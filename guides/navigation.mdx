@@ -1,0 +1,149 @@
+---
+title: "Menu-driven view switching with SlideMenu"
+description: "Switch top-level views from the side menu using @State selection and slideMenuToggle. Explains why NavigationLink belongs in destination views, not the menu."
+---
+
+Using the side menu to switch between top-level views is one of the most common patterns in iOS apps. Getting it right requires understanding where the `NavigationStack` lives and why `NavigationLink` belongs in your destination views — not in the menu panel itself.
+
+## Why not NavigationLink in the menu?
+
+It is tempting to put `NavigationLink` items directly inside the `menu` closure. The problem is that `NavigationStack` needs to be the parent of any `NavigationLink` for pushes to work. If you place `NavigationStack` inside the `main` closure (which is the correct structure), any `NavigationLink` inside the `menu` closure has no `NavigationStack` ancestor, so the push either fails silently or pushes inside the wrong container.
+
+<Warning>
+  Do not put `NavigationLink` inside the `menu` closure. It will not push content into the main content area.
+</Warning>
+
+## The correct pattern
+
+The right approach is to keep one `NavigationStack` inside `main`, use `@State` to track the currently selected page, and have menu buttons set that state and call `toggle()` to close the menu.
+
+<Steps>
+  <Step title="Define a page enum">
+    Create a `CaseIterable`, `Identifiable` enum for your top-level destinations.
+
+    ```swift
+    enum Page: String, CaseIterable, Identifiable {
+        case home, settings, about
+        var id: Self { self }
+    }
+    ```
+  </Step>
+  <Step title="Add @State selection to the root view">
+    Hold the selection in the view that contains `SlideMenu`. This makes the selected page the single source of truth for what the main content area displays.
+
+    ```swift
+    struct MyApp: View {
+        @State private var selection: Page = .home
+
+        var body: some View {
+            SlideMenu {
+                NavigationStack {
+                    switch selection {
+                    case .home:     HomeView()
+                    case .settings: SettingsView()
+                    case .about:    AboutView()
+                    }
+                }
+            } menu: {
+                MenuList(selection: $selection)
+            }
+        }
+    }
+    ```
+  </Step>
+  <Step title="Build the menu list with buttons">
+    In the menu view, use `Button` — not `NavigationLink` — and read `slideMenuToggle` from the environment. When a button is tapped, update the selection and immediately close the menu.
+
+    ```swift
+    struct MenuList: View {
+        @Binding var selection: Page
+        @Environment(\.slideMenuToggle) private var toggle
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 24) {
+                ForEach(Page.allCases) { page in
+                    Button(page.rawValue.capitalized) {
+                        selection = page
+                        toggle()
+                    }
+                }
+            }
+            .padding(.leading, 24)
+            .padding(.top, 80)
+        }
+    }
+    ```
+  </Step>
+</Steps>
+
+## Complete example
+
+Here is the full implementation from the steps above assembled into a working snippet you can paste directly into your project.
+
+```swift
+enum Page: String, CaseIterable, Identifiable {
+    case home, settings, about
+    var id: Self { self }
+}
+
+struct MyApp: View {
+    @State private var selection: Page = .home
+
+    var body: some View {
+        SlideMenu {
+            NavigationStack {
+                switch selection {
+                case .home:     HomeView()
+                case .settings: SettingsView()
+                case .about:    AboutView()
+                }
+            }
+        } menu: {
+            MenuList(selection: $selection)
+        }
+    }
+}
+
+struct MenuList: View {
+    @Binding var selection: Page
+    @Environment(\.slideMenuToggle) private var toggle
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            ForEach(Page.allCases) { page in
+                Button(page.rawValue.capitalized) {
+                    selection = page
+                    toggle()
+                }
+            }
+        }
+        .padding(.leading, 24)
+        .padding(.top, 80)
+    }
+}
+```
+
+## How the toggle reaches the menu
+
+`SlideMenu` injects the toggle action into the environment of both the `main` and `menu` closures. This means `MenuList` can read `\.slideMenuToggle` even though it lives inside the `menu` closure, not the `main` closure. You do not need to pass the toggle down as a parameter.
+
+## NavigationLink still works from destination views
+
+Because the `NavigationStack` lives inside `main`, any `NavigationLink` used within `HomeView`, `SettingsView`, or `AboutView` pushes correctly within the main content area. The side menu has no effect on this navigation stack.
+
+```swift
+struct HomeView: View {
+    var body: some View {
+        List {
+            NavigationLink("Detail") {
+                DetailView() // pushes inside the main NavigationStack ✓
+            }
+        }
+        .navigationTitle("Home")
+    }
+}
+```
+
+<Note>
+  Calling `toggle()` while a push is in progress is safe — SwiftUI will animate the menu close while the push transition completes independently.
+</Note>

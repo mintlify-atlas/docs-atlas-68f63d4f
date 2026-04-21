@@ -1,97 +1,79 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "SlideMenu: Gesture-Driven Side Menu for SwiftUI"
+description: "SlideMenu is a lightweight SwiftUI component for edge-swipe side menus. Fully customizable via environment modifiers with zero external dependencies."
 ---
 
-## Setting up
+SlideMenu brings native-feeling, gesture-driven side menus to SwiftUI apps. Drop it into any view hierarchy, customize every aspect through environment modifiers, and let `SlideMenuButton` wire itself up automatically — no bindings or callbacks required.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Installation" icon="swift" href="/installation">
+    Add SlideMenu to your project via Swift Package Manager in seconds
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Build your first gesture-driven side menu in under 5 minutes
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Customization guide" icon="paintbrush" href="/guides/customization">
+    Control width, background, overlay, borders, and animations
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API reference" icon="code" href="/api/slide-menu">
+    Full reference for SlideMenu, SlideMenuButton, and all modifiers
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Key features
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Edge-swipe gestures" icon="hand-pointer">
+    Horizontal drag from the screen edge opens the menu. Axis locking ensures it works seamlessly alongside `ScrollView`, `List`, and `Form`.
+  </Card>
+  <Card title="Left and right support" icon="arrows-left-right">
+    Choose which edge the menu slides from using `SlideMenuDirection.left` or `.right`.
+  </Card>
+  <Card title="Environment-based API" icon="leaf">
+    All customization flows through SwiftUI's environment — apply modifiers anywhere in the ancestor chain, no prop drilling needed.
+  </Card>
+  <Card title="Zero dependencies" icon="circle-check">
+    Pure Swift, no third-party packages. Distributed as a Swift Package with iOS 15+ support.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Get started
 
-## Need inspiration?
+<Steps>
+  <Step title="Add the package">
+    In Xcode, go to **File → Add Package Dependencies** and enter the repository URL, or add it to your `Package.swift`:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+    ```swift Package.swift
+    dependencies: [
+        .package(url: "https://github.com/matteozappia/SlideMenu.git", branch: "main")
+    ]
+    ```
+  </Step>
+  <Step title="Import and use">
+    Import `SlideMenu` and wrap your root view:
+
+    ```swift ContentView.swift
+    import SlideMenu
+
+    SlideMenu {
+        Text("Main Content")
+    } menu: {
+        Text("Side Menu")
+    }
+    ```
+  </Step>
+  <Step title="Customize appearance">
+    Apply modifiers to control the look and feel:
+
+    ```swift
+    SlideMenu { ... } menu: { ... }
+        .slideMenuWidth(300)
+        .slideMenuBackground(.ultraThinMaterial)
+        .slideMenuAnimation(.bouncy(duration: 0.5, extraBounce: 0.15))
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  Read the [quickstart guide](/quickstart) for a complete working example with navigation and a toggle button.
+</Tip>

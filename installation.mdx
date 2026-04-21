@@ -1,0 +1,64 @@
+---
+title: "Install SlideMenu via Swift Package Manager"
+description: "Add SlideMenu to your iOS project using Xcode's package UI or Package.swift. Zero external dependencies, iOS 15+ support, and Swift 6.0+ required."
+---
+
+SlideMenu is distributed exclusively through Swift Package Manager and has no external dependencies. You can add it to your project directly through Xcode's package UI or by editing `Package.swift` by hand.
+
+## Add via Xcode
+
+<Steps>
+  <Step title="Open the Add Package dialog">
+    In Xcode, go to **File → Add Package Dependencies**. The package search sheet appears.
+  </Step>
+  <Step title="Enter the repository URL">
+    Paste the repository URL into the search field:
+
+    ```
+    https://github.com/matteozappia/SlideMenu.git
+    ```
+
+    Press **Return** to fetch the package.
+  </Step>
+  <Step title="Select the branch">
+    Under **Dependency Rule**, choose **Branch** and enter `main`. Click **Add Package**.
+  </Step>
+  <Step title="Add the library to your target">
+    When prompted to choose package products, select **SlideMenu** and add it to your app target. Click **Add Package** to finish.
+  </Step>
+</Steps>
+
+## Add via Package.swift
+
+If you manage dependencies in a `Package.swift` manifest, add SlideMenu to the `dependencies` array and include it in the relevant target:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/matteozappia/SlideMenu.git", branch: "main")
+]
+```
+
+Then add `"SlideMenu"` to the target that uses it:
+
+```swift
+.target(
+    name: "YourApp",
+    dependencies: ["SlideMenu"]
+)
+```
+
+## Import the module
+
+Once the package is resolved, add the import at the top of any Swift file that uses SlideMenu:
+
+```swift
+import SlideMenu
+```
+
+## Platform requirements
+
+SlideMenu targets iOS 15 and later. The demo app in the `Demo/` folder requires iOS 16+, but the framework itself runs on iOS 15+.
+
+<Note>
+  SlideMenu requires Swift 6.0+ and Xcode 16+. If you are on an older toolchain, update Xcode before adding the package.
+</Note>

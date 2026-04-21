@@ -1,0 +1,147 @@
+---
+title: "Customize SlideMenu appearance with view modifiers"
+description: "Control SlideMenu's width, background material, dimming overlay, border stroke, and open/close animation using SwiftUI environment-based view modifiers."
+---
+
+Every visual aspect of `SlideMenu` is controlled through SwiftUI view modifiers that write values into the environment. This means you can apply them to the `SlideMenu` view itself or to any ancestor — the values propagate down automatically. No subclassing, no configuration objects.
+
+## Available modifiers
+
+<AccordionGroup>
+  <Accordion title="Where to apply modifiers">
+    Because the modifiers use `environment(_:_:)` internally, you can apply them at any level of the view hierarchy above `SlideMenu`. Applying them on the `SlideMenu` directly is the most explicit choice. Applying them on a parent view is useful when you want a consistent appearance across multiple `SlideMenu` instances in the same app.
+
+    ```swift
+    // On the SlideMenu itself
+    SlideMenu { ... } menu: { ... }
+        .slideMenuWidth(300)
+
+    // On a parent view — affects all SlideMenus below it
+    ContentView()
+        .slideMenuWidth(300)
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Menu width
+
+`.slideMenuWidth(_ width: CGFloat)` sets the width of the sliding panel in points. The default is `290`.
+
+```swift
+.slideMenuWidth(320)
+```
+
+### Background
+
+`.slideMenuBackground(_ style: some ShapeStyle)` sets the background for both the menu panel and the main content surface. The default is the system `.background` style.
+
+The modifier accepts any `ShapeStyle`, giving you solid colors, iOS materials, and custom gradients:
+
+```swift
+// Solid color
+.slideMenuBackground(Color(.systemBackground))
+
+// iOS material (blur effect)
+.slideMenuBackground(.ultraThinMaterial)
+
+// Gradient
+.slideMenuBackground(
+    LinearGradient(
+        colors: [.blue, .purple],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+)
+```
+
+### Overlay color
+
+`.slideMenuOverlayColor(_ color: Color)` overrides the color of the dimming overlay drawn on top of the main content while the menu is open. By default the overlay is black in dark mode and white in light mode.
+
+```swift
+.slideMenuOverlayColor(.black)
+```
+
+Use this when you want a consistent overlay color regardless of the user's appearance setting.
+
+### Overlay opacity
+
+`.slideMenuOverlayOpacity(_ opacity: CGFloat)` sets the maximum opacity the overlay reaches when the menu is fully open. The default is `0.6`. The value is clamped between `0` (fully transparent) and `1` (fully opaque).
+
+```swift
+.slideMenuOverlayOpacity(0.4)
+```
+
+The overlay fades in proportionally as the menu opens, reaching this maximum at full extension.
+
+### Border color
+
+`.slideMenuBorderColor(_ color: Color)` sets the color of the thin stroke drawn around the main content while the menu is open or being dragged. The default is `.primary`.
+
+```swift
+.slideMenuBorderColor(.gray)
+```
+
+### Border width
+
+`.slideMenuBorderWidth(_ width: CGFloat)` sets the stroke width in points. The default is `1`. Set it to `0` to remove the border entirely.
+
+```swift
+.slideMenuBorderWidth(0.5)  // subtle
+.slideMenuBorderWidth(0)    // none
+```
+
+### Animation
+
+`.slideMenuAnimation(_ animation: Animation)` sets the animation used when the menu opens or closes. The default is `.spring(response: 0.35, dampingFraction: 0.85)`.
+
+```swift
+// Default spring
+.slideMenuAnimation(.spring(response: 0.35, dampingFraction: 0.85))
+
+// Bouncier feel
+.slideMenuAnimation(.bouncy(duration: 0.5, extraBounce: 0.15))
+
+// Simple ease
+.slideMenuAnimation(.easeInOut(duration: 0.3))
+```
+
+## Quick reference
+
+| Modifier | Type | Default |
+|---|---|---|
+| `.slideMenuWidth` | `CGFloat` | `290` |
+| `.slideMenuBackground` | `ShapeStyle` | `.background` |
+| `.slideMenuOverlayColor` | `Color` | auto (dark/light) |
+| `.slideMenuOverlayOpacity` | `CGFloat` | `0.6` |
+| `.slideMenuBorderColor` | `Color` | `.primary` |
+| `.slideMenuBorderWidth` | `CGFloat` | `1` |
+| `.slideMenuAnimation` | `Animation` | `.spring(response: 0.35, dampingFraction: 0.85)` |
+
+## Full customized example
+
+Here is a complete setup combining all the pieces: a left-sliding menu with a wide edge zone, a 300-point panel, an ultra-thin material background, a reduced overlay, no border, and a bouncy animation.
+
+```swift
+SlideMenu(direction: .left, edgeZoneWidth: 40) {
+    NavigationStack {
+        ContentView()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SlideMenuButton(systemImage: "sidebar.leading")
+                }
+            }
+    }
+} menu: {
+    MenuView()
+}
+.slideMenuWidth(300)
+.slideMenuBackground(.ultraThinMaterial)
+.slideMenuOverlayOpacity(0.5)
+.slideMenuBorderWidth(0)
+.slideMenuAnimation(.bouncy(duration: 0.5, extraBounce: 0.15))
+```
+
+<Note>
+  `.ultraThinMaterial` blurs content beneath the panel. On devices running iOS 15, all materials are supported since `SlideMenu` targets iOS 15+.
+</Note>

@@ -1,0 +1,225 @@
+---
+title: "SlideMenu view modifiers — full API reference"
+description: "API reference for all seven SlideMenu view modifiers. Documents each modifier's parameter type, default value, and usage with examples drawn from the source."
+---
+
+SlideMenu exposes seven view modifiers that let you configure the appearance and behavior of the menu panel. You apply them directly to a `SlideMenu` view or to any ancestor in the view hierarchy — because they write into the SwiftUI environment, the values propagate down to `SlideMenu` automatically.
+
+<Note>
+  You can attach these modifiers to any view that contains a `SlideMenu` — including a `WindowGroup` or a root navigation view — and the settings will apply to all `SlideMenu` instances within that subtree.
+</Note>
+
+---
+
+## `.slideMenuWidth(_:)`
+
+Sets the width of the slide-out panel in points.
+
+```swift
+public func slideMenuWidth(_ width: CGFloat) -> some View
+```
+
+<ParamField path="width" type="CGFloat" required>
+  The width of the menu panel in points. Values that exceed the screen width are clamped at runtime. Defaults to `290`.
+</ParamField>
+
+**Default:** `290`
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuWidth(320)
+```
+
+---
+
+## `.slideMenuBackground(_:)`
+
+Sets the background style applied to both the menu panel and the main content surface.
+
+```swift
+public func slideMenuBackground(_ style: some ShapeStyle) -> some View
+```
+
+<ParamField path="style" type="some ShapeStyle" required>
+  Any `ShapeStyle` — for example a solid `Color`, a `Material` such as `.ultraThinMaterial`, or a custom gradient. Defaults to the system `.background`.
+</ParamField>
+
+**Default:** `.background`
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuBackground(.ultraThinMaterial)
+```
+
+---
+
+## `.slideMenuOverlayColor(_:)`
+
+Overrides the color of the dimming overlay drawn on top of the main content while the menu is open.
+
+```swift
+public func slideMenuOverlayColor(_ color: Color) -> some View
+```
+
+<ParamField path="color" type="Color" required>
+  The tint color of the overlay. When this modifier is not applied, the overlay color resolves automatically — black in dark mode, white in light mode.
+</ParamField>
+
+**Default:** automatic (`black` in dark mode, `white` in light mode)
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuOverlayColor(.indigo)
+```
+
+---
+
+## `.slideMenuOverlayOpacity(_:)`
+
+Sets the maximum opacity the dimming overlay reaches when the menu is fully open.
+
+```swift
+public func slideMenuOverlayOpacity(_ opacity: CGFloat) -> some View
+```
+
+<ParamField path="opacity" type="CGFloat" required>
+  A value between `0.0` (fully transparent — no overlay) and `1.0` (fully opaque). The overlay opacity is interpolated from `0` to this value as the user drags the panel open. Defaults to `0.6`.
+</ParamField>
+
+**Default:** `0.6`
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuOverlayOpacity(0.4)
+```
+
+<Tip>
+  Set `.slideMenuOverlayOpacity(0)` to remove the dimming effect entirely while keeping tap-to-dismiss behavior. Combine with a custom `.slideMenuOverlayColor` if you want a subtle tinted veil instead of a dark overlay.
+</Tip>
+
+---
+
+## `.slideMenuBorderColor(_:)`
+
+Sets the color of the border stroke drawn around the main content view while the menu is open or being dragged.
+
+```swift
+public func slideMenuBorderColor(_ color: Color) -> some View
+```
+
+<ParamField path="color" type="Color" required>
+  The stroke color. The border is only visible while the menu is actively open or the user is dragging, so the color is applied with a reduced opacity internally. Defaults to `.primary`.
+</ParamField>
+
+**Default:** `.primary`
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuBorderColor(.blue)
+```
+
+---
+
+## `.slideMenuBorderWidth(_:)`
+
+Sets the line width of the border stroke drawn around the main content surface.
+
+```swift
+public func slideMenuBorderWidth(_ width: CGFloat) -> some View
+```
+
+<ParamField path="width" type="CGFloat" required>
+  The stroke width in points. Pass `0` to remove the border completely. Defaults to `1`.
+</ParamField>
+
+**Default:** `1`
+
+```swift
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuBorderWidth(2)
+```
+
+---
+
+## `.slideMenuAnimation(_:)`
+
+Sets the animation used when the menu opens or closes, including programmatic toggles and gesture-driven snapping.
+
+```swift
+public func slideMenuAnimation(_ animation: Animation) -> some View
+```
+
+<ParamField path="animation" type="Animation" required>
+  Any SwiftUI `Animation`. Applied both when the user lifts their finger after dragging and when the toggle action fires. Defaults to `.spring(response: 0.35, dampingFraction: 0.85)`.
+</ParamField>
+
+**Default:** `.spring(response: 0.35, dampingFraction: 0.85)`
+
+<CodeGroup>
+
+```swift Spring (default feel)
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuAnimation(.spring(response: 0.35, dampingFraction: 0.85))
+```
+
+```swift Bouncy
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuAnimation(.bouncy)
+```
+
+```swift Linear
+SlideMenu(direction: .left) {
+    ContentView()
+} menu: {
+    MenuView()
+}
+.slideMenuAnimation(.linear(duration: 0.25))
+```
+
+</CodeGroup>
+
+---
+
+## Quick-reference table
+
+| Modifier | Parameter type | Default |
+|---|---|---|
+| `.slideMenuWidth(_:)` | `CGFloat` | `290` |
+| `.slideMenuBackground(_:)` | `some ShapeStyle` | `.background` |
+| `.slideMenuOverlayColor(_:)` | `Color` | auto (dark/light mode) |
+| `.slideMenuOverlayOpacity(_:)` | `CGFloat` | `0.6` |
+| `.slideMenuBorderColor(_:)` | `Color` | `.primary` |
+| `.slideMenuBorderWidth(_:)` | `CGFloat` | `1` |
+| `.slideMenuAnimation(_:)` | `Animation` | `.spring(response: 0.35, dampingFraction: 0.85)` |

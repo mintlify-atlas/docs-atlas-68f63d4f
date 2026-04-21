@@ -1,0 +1,106 @@
+---
+title: "Basic SlideMenu usage: direction and edge zones"
+description: "Configure SlideMenu's direction and edgeZoneWidth, and understand how gesture axis locking lets it coexist with ScrollView, List, and Form."
+---
+
+`SlideMenu` is a container view that wraps your main content and a side menu panel. You pass both as view builder closures, and the library handles the sliding animation, gesture recognition, and tap-to-dismiss overlay for you. No bindings, no state management required in the simplest case.
+
+## Initializer signature
+
+```swift
+SlideMenu(
+    direction: SlideMenuDirection = .left,
+    edgeZoneWidth: CGFloat = 30,
+    @ViewBuilder main: () -> Main,
+    @ViewBuilder menu: () -> Menu
+)
+```
+
+Both `direction` and `edgeZoneWidth` have defaults, so you only need to provide the two trailing closures in the minimal case.
+
+## Minimal example
+
+The shortest valid `SlideMenu` requires only the `main` and `menu` closures. Place your primary screen content in `main` and your navigation or utility panel in `menu`.
+
+```swift
+SlideMenu {
+    Text("Main Content")
+} menu: {
+    VStack {
+        Text("Home")
+        Text("Settings")
+    }
+}
+```
+
+Swipe right from the left edge of the screen to open the menu. Tap the dimming overlay or swipe back to close it.
+
+## Direction
+
+By default the menu slides in from the left edge. Pass `direction: .right` to make it slide in from the right instead.
+
+<Tabs>
+  <Tab title="Left (default)">
+    ```swift
+    SlideMenu {
+        Text("Main")
+    } menu: {
+        Text("Left Side Menu")
+    }
+    ```
+  </Tab>
+  <Tab title="Right">
+    ```swift
+    SlideMenu(direction: .right) {
+        Text("Main")
+    } menu: {
+        Text("Right Side Menu")
+    }
+    ```
+  </Tab>
+</Tabs>
+
+Use `.left` for app navigation menus (the standard iOS pattern) and `.right` for contextual panels, filters, or inspector drawers.
+
+## Edge zone width
+
+The edge zone is the invisible strip along the screen edge where a swipe gesture is recognized to open the menu. Its width defaults to `30` points.
+
+```swift
+SlideMenu(edgeZoneWidth: 50) {
+    // main content
+} menu: {
+    // menu content
+}
+```
+
+<Tip>
+  Increase `edgeZoneWidth` if users have trouble triggering the open gesture, especially in apps where interactive controls sit near the screen edge.
+</Tip>
+
+Decrease it to reduce conflicts with horizontal controls such as sliders or carousels that live close to the edge.
+
+## How gesture axis locking works
+
+`SlideMenu` uses a `DragGesture` with a minimum distance of `10` points and coordinates in the global coordinate space. When the gesture fires, the library determines the intended axis before committing to any movement:
+
+<Steps>
+  <Step title="Wait for minimum movement">
+    The gesture handler waits until the translation is at least `5` points in either axis before making a decision.
+  </Step>
+  <Step title="Check axis dominance">
+    It compares `abs(translation.width)` against `abs(translation.height)`. If the horizontal component is larger, the gesture is treated as horizontal; otherwise it is locked to vertical and ignored by SlideMenu.
+  </Step>
+  <Step title="Check the edge zone (when closed)">
+    When the menu is currently closed, a horizontal gesture is only accepted if the drag started inside the edge zone — within `edgeZoneWidth` points of the leading edge for `.left`, or within `edgeZoneWidth` points of the trailing edge for `.right`. Drags that start outside this zone are ignored, so horizontal controls in the middle of the screen work normally.
+  </Step>
+  <Step title="Track offset">
+    Once accepted as horizontal, the gesture tracks the menu offset in real time. On release, a velocity calculation determines whether to snap fully open or snap closed.
+  </Step>
+</Steps>
+
+This axis-locking approach means `SlideMenu` coexists with `ScrollView`, `List`, and `Form` without fighting for vertical scrolls.
+
+<Note>
+  When the menu is already open, any horizontal drag anywhere on the main content is accepted (not just from the edge zone), so users can slide the menu closed from the center of the screen.
+</Note>

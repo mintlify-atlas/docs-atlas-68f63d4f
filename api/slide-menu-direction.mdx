@@ -1,0 +1,58 @@
+---
+title: "SlideMenuDirection — menu edge enum reference"
+description: "API reference for SlideMenuDirection. Pass .left to slide the menu from the leading edge or .right for the trailing edge. Conforms to Hashable."
+---
+
+`SlideMenuDirection` controls which edge of the screen the `SlideMenu` panel slides in from. Pass it to the `direction` parameter of the `SlideMenu` initializer. The default is `.left`.
+
+## Type declaration
+
+```swift
+public enum SlideMenuDirection: Hashable
+```
+
+## Cases
+
+<ParamField path="left" type="SlideMenuDirection">
+  The menu slides in from the **leading** (left) edge of the screen. The main content shifts to the right to reveal the menu behind it. This is the default direction.
+</ParamField>
+
+<ParamField path="right" type="SlideMenuDirection">
+  The menu slides in from the **trailing** (right) edge of the screen. The main content shifts to the left to reveal the menu behind it.
+</ParamField>
+
+## Conformances
+
+| Protocol | Notes |
+|---|---|
+| `Hashable` | Both cases are directly hashable. You can use `SlideMenuDirection` as a dictionary key or in a `Set`. |
+
+## Usage with SlideMenu
+
+Pass a `SlideMenuDirection` case to the `direction` parameter of `SlideMenu`. Omit it entirely to use the default `.left` direction.
+
+```swift
+// Leading-edge menu (default)
+SlideMenu(direction: .left) {
+    MainView()
+} menu: {
+    NavigationMenuView()
+}
+```
+
+```swift
+// Trailing-edge menu
+SlideMenu(direction: .right) {
+    MainView()
+} menu: {
+    SettingsPanelView()
+}
+```
+
+<Note>
+  The swipe gesture that opens the menu is constrained to the correct edge automatically. With `.left`, only a drag that starts within `edgeZoneWidth` points of the left edge triggers the open gesture. With `.right`, the same applies to the right edge.
+</Note>
+
+<Tip>
+  If your app uses a right-to-left locale, consider using `.right` so the menu appears on the leading side for those users, or let SwiftUI's environment handle layout direction and always pass `.left` for a leading-anchored menu regardless of locale.
+</Tip>

@@ -1,80 +1,160 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Get started: Add SlideMenu to a SwiftUI app"
+description: "Add a gesture-driven side menu to a SwiftUI app with SlideMenu in under 5 minutes, from package installation through a fully styled, production-ready example."
 ---
 
-## Get started in three steps
+This guide walks you through adding SlideMenu to a SwiftUI app, wiring up a toolbar toggle button, and applying appearance modifiers — ending with a complete, production-ready example you can drop straight into your project.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Install the package">
+    Add SlideMenu via Swift Package Manager. In Xcode go to **File → Add Package Dependencies**, paste the URL below, and select the `main` branch.
 
-### Step 1: Set up your local environment
+    ```
+    https://github.com/matteozappia/SlideMenu.git
+    ```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    Then import the module in any file you want to use it:
 
-### Step 2: Deploy your changes
+    ```swift
+    import SlideMenu
+    ```
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    For full installation instructions, see the [installation guide](/installation).
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Wrap your content in SlideMenu">
+    `SlideMenu` takes two view builder closures: `main` for your primary content and `menu` for the panel that slides in. Both are required.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```swift
+    import SwiftUI
+    import SlideMenu
 
-### Step 3: Go live
+    struct AppView: View {
+        var body: some View {
+            SlideMenu {
+                Text("Main Content")
+            } menu: {
+                VStack {
+                    Text("Home")
+                    Text("Settings")
+                }
+            }
+        }
+    }
+    ```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    By default the menu slides in from the left edge and responds to swipes within 30 points of the screen edge. Tapping the dimming overlay closes it.
 
-## Next steps
+    <Tip>
+      Pass `direction: .right` to `SlideMenu` if you want the menu on the trailing edge of the screen.
+    </Tip>
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Add a SlideMenuButton to the toolbar">
+    `SlideMenuButton` reads the toggle action from the SwiftUI environment automatically — you don't need a binding or a callback. Place it anywhere inside the `main` content closure, including inside a `NavigationStack` toolbar.
 
-<CardGroup cols={2}>
+    ```swift
+    SlideMenu {
+        NavigationStack {
+            Text("Hello")
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        SlideMenuButton(systemImage: "sidebar.leading")
+                    }
+                }
+        }
+    } menu: {
+        Text("Menu")
+    }
+    ```
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+    You can also provide a fully custom label using the view builder initializer:
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+    ```swift
+    SlideMenuButton {
+        Label("Menu", systemImage: "line.3.horizontal")
+    }
+    ```
+  </Step>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+  <Step title="Customize appearance with modifiers">
+    All appearance settings are applied through view modifiers on the `SlideMenu` or any ancestor view. The modifiers write into the SwiftUI environment, so you can set defaults at the app root and override them locally.
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+    **Menu width**
 
-</CardGroup>
+    ```swift
+    .slideMenuWidth(300)
+    ```
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+    **Background** — accepts any `ShapeStyle`: solid colors, materials, or gradients:
+
+    ```swift
+    .slideMenuBackground(.ultraThinMaterial)
+    .slideMenuBackground(Color(.systemBackground))
+    .slideMenuBackground(LinearGradient(colors: [.blue, .purple], startPoint: .top, endPoint: .bottom))
+    ```
+
+    **Dimming overlay** — the overlay drawn over the main content while the menu is open:
+
+    ```swift
+    .slideMenuOverlayColor(.black)
+    .slideMenuOverlayOpacity(0.4)
+    ```
+
+    **Border** — a thin stroke around the main panel while the menu is visible:
+
+    ```swift
+    .slideMenuBorderColor(.gray)
+    .slideMenuBorderWidth(0.5)
+    ```
+
+    **Animation** — any SwiftUI `Animation`:
+
+    ```swift
+    .slideMenuAnimation(.spring(response: 0.35, dampingFraction: 0.85))
+    .slideMenuAnimation(.bouncy(duration: 0.5, extraBounce: 0.15))
+    .slideMenuAnimation(.easeInOut(duration: 0.3))
+    ```
+
+    <Note>
+      Modifiers use default values when not applied. The defaults are: width `290`, background `.background`, overlay opacity `0.6`, border color `.primary`, border width `1`, and animation `.spring(response: 0.35, dampingFraction: 0.85)`.
+    </Note>
+  </Step>
+
+  <Step title="Put it all together">
+    Here is a complete example combining all the features above. It uses a left-side menu with a 40-point edge zone, a toolbar button, and a fully styled appearance:
+
+    ```swift
+    import SwiftUI
+    import SlideMenu
+
+    struct AppView: View {
+        var body: some View {
+            SlideMenu(direction: .left, edgeZoneWidth: 40) {
+                NavigationStack {
+                    ContentView()
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                SlideMenuButton(systemImage: "sidebar.leading")
+                            }
+                        }
+                }
+            } menu: {
+                MenuView()
+            }
+            .slideMenuWidth(300)
+            .slideMenuBackground(.ultraThinMaterial)
+            .slideMenuOverlayOpacity(0.5)
+            .slideMenuBorderWidth(0)
+            .slideMenuAnimation(.bouncy(duration: 0.5, extraBounce: 0.15))
+        }
+    }
+    ```
+
+    `edgeZoneWidth: 40` gives users a slightly wider swipe target along the left edge. Setting `.slideMenuBorderWidth(0)` removes the border entirely for a cleaner look.
+
+    <Tip>
+      If you need menu items to navigate between views in the main content area, read `slideMenuToggle` from the environment in your menu view and call it after updating your selection state. This keeps the `NavigationStack` in the main panel where `NavigationLink` pushes work correctly.
+    </Tip>
+  </Step>
+</Steps>

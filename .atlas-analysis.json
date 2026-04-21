@@ -1,0 +1,76 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "SlideMenu",
+  "projectDescription": "A lightweight, gesture-driven SwiftUI side menu component with edge-swipe navigation, environment-based customization, and zero dependencies.",
+  "theme": "willow",
+  "primaryColor": "#fc9804",
+  "lightColor": "#f1543c",
+  "darkColor": "#f4ac9c",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "installation", "quickstart"]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/basic-usage",
+              "guides/toggle-button",
+              "guides/navigation",
+              "guides/customization"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": ["api/slide-menu", "api/slide-menu-button", "api/slide-menu-direction"]
+          },
+          {
+            "group": "Modifiers & Environment",
+            "pages": ["api/view-modifiers", "api/environment-values"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Gesture-driven edge swipe with axis locking — works alongside ScrollView, List, and Form",
+    "Left and right direction support via SlideMenuDirection",
+    "Configurable edge detection zone width to avoid conflicts with interactive content",
+    "Tap-to-dismiss overlay with customizable color and opacity",
+    "Matches device display corner radius for a native feel",
+    "Full customization through SwiftUI environment modifiers — no bindings needed",
+    "SlideMenuButton reads toggle action from environment automatically",
+    "Zero external dependencies, Swift Package Manager distribution"
+  ],
+  "publicApiSurface": [
+    "SlideMenu(direction:edgeZoneWidth:main:menu:)",
+    "SlideMenuButton(label:)",
+    "SlideMenuButton(systemImage:)",
+    "SlideMenuDirection.left",
+    "SlideMenuDirection.right",
+    ".slideMenuWidth(_:)",
+    ".slideMenuBackground(_:)",
+    ".slideMenuOverlayColor(_:)",
+    ".slideMenuOverlayOpacity(_:)",
+    ".slideMenuBorderColor(_:)",
+    ".slideMenuBorderWidth(_:)",
+    ".slideMenuAnimation(_:)",
+    "EnvironmentValues.slideMenuToggle",
+    "EnvironmentValues.slideMenuWidth",
+    "EnvironmentValues.slideMenuBackground",
+    "EnvironmentValues.slideMenuOverlayColor",
+    "EnvironmentValues.slideMenuOverlayOpacity",
+    "EnvironmentValues.slideMenuBorderColor",
+    "EnvironmentValues.slideMenuBorderWidth",
+    "EnvironmentValues.slideMenuAnimation"
+  ]
+}

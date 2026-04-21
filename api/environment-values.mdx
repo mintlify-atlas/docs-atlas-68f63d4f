@@ -1,0 +1,182 @@
+---
+title: "SlideMenu EnvironmentValues — full property reference"
+description: "Reference for SlideMenu's EnvironmentValues extensions: seven appearance values set via modifiers, plus slideMenuToggle injected automatically by SlideMenu."
+---
+
+SlideMenu extends SwiftUI's `EnvironmentValues` with eight properties that control the menu's appearance and expose its toggle action. Seven of those properties are written by the [view modifiers](/api/view-modifiers) and read by `SlideMenu` at render time. The eighth — `slideMenuToggle` — is injected automatically by `SlideMenu` itself so that any descendant view can open or close the menu without needing a binding.
+
+<Note>
+  You should rarely need to interact with these environment values directly. Prefer the view modifiers (such as `.slideMenuWidth(_:)`) for configuring appearance — they are more idiomatic SwiftUI and provide the same result. The one value you will regularly read yourself is `slideMenuToggle`.
+</Note>
+
+---
+
+## `slideMenuWidth`
+
+<ResponseField name="slideMenuWidth" type="CGFloat" default="290">
+  The width of the menu panel in points. Written by the `.slideMenuWidth(_:)` modifier and consumed by `SlideMenu` to determine how far the main content slides aside.
+</ResponseField>
+
+**Set by:** `.slideMenuWidth(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+// Prefer the modifier:
+SlideMenu { ... } menu: { ... }
+    .slideMenuWidth(320)
+
+// Direct environment write (less common):
+SlideMenu { ... } menu: { ... }
+    .environment(\.slideMenuWidth, 320)
+```
+
+---
+
+## `slideMenuBackground`
+
+<ResponseField name="slideMenuBackground" type="AnyShapeStyle" default="AnyShapeStyle(.background)">
+  The background style applied to both the menu panel and the main content surface. Because SwiftUI's `ShapeStyle` protocol is not directly storable in the environment, the value is type-erased to `AnyShapeStyle`. The `.slideMenuBackground(_:)` modifier performs that erasure for you.
+</ResponseField>
+
+**Set by:** `.slideMenuBackground(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+SlideMenu { ... } menu: { ... }
+    .slideMenuBackground(.ultraThinMaterial)
+```
+
+---
+
+## `slideMenuOverlayColor`
+
+<ResponseField name="slideMenuOverlayColor" type="Color?" default="nil">
+  An optional tint color for the dimming overlay shown on top of the main content while the menu is open. When the value is `nil` (the default), `SlideMenu` resolves the color automatically based on the current `colorScheme` — black in dark mode, white in light mode.
+</ResponseField>
+
+**Set by:** `.slideMenuOverlayColor(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+// Force a specific overlay tint regardless of color scheme:
+SlideMenu { ... } menu: { ... }
+    .slideMenuOverlayColor(.indigo)
+```
+
+---
+
+## `slideMenuOverlayOpacity`
+
+<ResponseField name="slideMenuOverlayOpacity" type="CGFloat" default="0.6">
+  The maximum opacity the dimming overlay reaches when the menu is fully open. The actual opacity is interpolated proportionally as the panel travels between closed (0) and fully open (1). Valid range is `0.0`–`1.0`.
+</ResponseField>
+
+**Set by:** `.slideMenuOverlayOpacity(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+SlideMenu { ... } menu: { ... }
+    .slideMenuOverlayOpacity(0.4)
+```
+
+---
+
+## `slideMenuBorderColor`
+
+<ResponseField name="slideMenuBorderColor" type="Color" default=".primary">
+  The color of the border stroke drawn around the main content surface while the menu is open or being dragged. `SlideMenu` applies a reduced opacity to this color so the border appears subtle against varied backgrounds.
+</ResponseField>
+
+**Set by:** `.slideMenuBorderColor(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+SlideMenu { ... } menu: { ... }
+    .slideMenuBorderColor(.blue)
+```
+
+---
+
+## `slideMenuBorderWidth`
+
+<ResponseField name="slideMenuBorderWidth" type="CGFloat" default="1">
+  The line width in points of the border stroke drawn around the main content surface. Set to `0` to suppress the border entirely.
+</ResponseField>
+
+**Set by:** `.slideMenuBorderWidth(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+SlideMenu { ... } menu: { ... }
+    .slideMenuBorderWidth(1.5)
+```
+
+---
+
+## `slideMenuAnimation`
+
+<ResponseField name="slideMenuAnimation" type="Animation" default=".spring(response: 0.35, dampingFraction: 0.85)">
+  The animation used when the menu opens or closes, whether through a programmatic toggle or a gesture-driven snap. Applies to both the `withAnimation` call inside `SlideMenu`'s `toggle()` function and to the drag-end snapping logic.
+</ResponseField>
+
+**Set by:** `.slideMenuAnimation(_:)` modifier  
+**Read by:** `SlideMenu`
+
+```swift
+SlideMenu { ... } menu: { ... }
+    .slideMenuAnimation(.bouncy)
+```
+
+---
+
+## `slideMenuToggle`
+
+<ResponseField name="slideMenuToggle" type="@MainActor @Sendable () -> Void" default="{}">
+  A closure that toggles the menu between open and closed. `SlideMenu` injects a live implementation of this closure into the environment of both its `main` and `menu` content at render time.
+
+  The default value is a no-op `{}` — if you read `slideMenuToggle` from a view that is not a descendant of a `SlideMenu`, calling it does nothing.
+</ResponseField>
+
+**Injected by:** `SlideMenu` (into both `main` and `menu` content)  
+**Read by:** descendant views — most commonly `SlideMenuButton`
+
+Because `SlideMenu` injects the toggle into the environment, any view inside the `main` or `menu` closures can read it with `@Environment` and call it without being passed a binding:
+
+```swift
+struct MyToolbarButton: View {
+    @Environment(\.slideMenuToggle) private var toggle
+
+    var body: some View {
+        Button {
+            toggle()
+        } label: {
+            Image(systemName: "sidebar.leading")
+        }
+    }
+}
+```
+
+You can place this button anywhere in the `main` subtree:
+
+```swift
+SlideMenu(direction: .left) {
+    NavigationStack {
+        ContentView()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    MyToolbarButton()
+                }
+            }
+    }
+} menu: {
+    MenuView()
+}
+```
+
+<Tip>
+  SlideMenu ships a built-in `SlideMenuButton` that reads `slideMenuToggle` automatically. Use it as a drop-in toolbar button rather than wiring up your own toggle reader unless you need custom behavior.
+</Tip>
+
+<Warning>
+  `slideMenuToggle` is marked `@MainActor`. Always call it from the main actor — for example, from a `Button` action, a `Task { @MainActor in toggle() }`, or another `@MainActor` context. Calling it from a background thread will produce a concurrency warning in Swift 6.
+</Warning>

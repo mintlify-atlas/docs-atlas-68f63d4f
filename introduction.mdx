@@ -1,0 +1,46 @@
+---
+title: "SlideMenu: Lightweight SwiftUI Side Menu Component"
+description: "SlideMenu is a gesture-driven SwiftUI side menu with edge-swipe, tap-to-dismiss, environment-based customization, and zero dependencies for iOS 15+."
+---
+
+SlideMenu is a SwiftUI component that adds a native-feeling slide-out side menu to any iOS app. It supports left and right edges, drag gestures with axis locking, tap-to-dismiss, and complete appearance control through view modifiers — all with no external dependencies.
+
+## What SlideMenu does
+
+SlideMenu wraps your app's content in a two-panel container. The main content panel slides aside to reveal the menu panel beneath, driven by edge swipe gestures or a programmatic toggle. The whole experience feels native because SlideMenu matches the device's display corner radius and uses standard SwiftUI animations.
+
+## How it works
+
+The component uses a `DragGesture` with axis locking to distinguish horizontal swipes from vertical scrolling. This means SlideMenu works correctly alongside `ScrollView`, `List`, and `Form` — vertical scroll gestures are passed through transparently.
+
+Opening and closing the menu can happen three ways:
+- **Edge swipe** — drag from the screen edge in the configured zone
+- **Tap-to-dismiss** — tap the dimming overlay while the menu is open
+- **SlideMenuButton** — a button component that reads the toggle action from the environment automatically
+
+## Requirements
+
+| | Minimum |
+|---|---|
+| Swift | 6.0+ |
+| iOS | 15+ |
+| Xcode | 16+ |
+
+## Architecture overview
+
+SlideMenu is organized around three public types:
+
+<CardGroup cols={2}>
+  <Card title="SlideMenu" icon="rectangle-history" href="/api/slide-menu">
+    The container view. Accepts main content and menu content as view builders.
+  </Card>
+  <Card title="SlideMenuButton" icon="toggle-on" href="/api/slide-menu-button">
+    A button that reads the toggle action from the environment — no binding needed.
+  </Card>
+  <Card title="SlideMenuDirection" icon="arrows-left-right" href="/api/slide-menu-direction">
+    An enum controlling which screen edge the menu slides from.
+  </Card>
+  <Card title="View modifiers" icon="paintbrush" href="/api/view-modifiers">
+    Seven environment-based modifiers for width, background, overlay, border, and animation.
+  </Card>
+</CardGroup>

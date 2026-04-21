@@ -1,0 +1,122 @@
+---
+title: "SlideMenuButton — environment-driven toggle button"
+description: "API reference for SlideMenuButton: system image and ViewBuilder label initializers. Reads slideMenuToggle automatically — no bindings or callbacks required."
+---
+
+`SlideMenuButton` is a zero-configuration button that toggles the nearest enclosing `SlideMenu` open or closed. It reads the `\.slideMenuToggle` action from the environment automatically, so you never need to pass a binding or callback. Place it anywhere inside the `main` or `menu` content of a `SlideMenu`.
+
+## Type declaration
+
+```swift
+public struct SlideMenuButton<Label: View>: View
+```
+
+`SlideMenuButton` is generic over its `Label` view. The `Label == Image` extension provides a convenience initializer for SF Symbols.
+
+## Initializers
+
+### Generic label initializer
+
+Use this initializer when you want full control over the button's visual content.
+
+```swift
+public init(@ViewBuilder label: () -> Label)
+```
+
+<ParamField path="label" type="() -> Label" required>
+  A `@ViewBuilder` closure that produces the button's visual content. You can return any `View`, including a `Label`, `Image`, `Text`, or a custom layout.
+</ParamField>
+
+### SF Symbol convenience initializer
+
+Use this initializer when you want to display a system symbol image with no additional customization.
+
+```swift
+// Available when Label == Image
+public init(systemImage: String)
+```
+
+<ParamField path="systemImage" type="String" required>
+  The name of an SF Symbol (e.g., `"sidebar.leading"`, `"line.3.horizontal"`). Passed directly to `Image(systemName:)`.
+</ParamField>
+
+## Environment value read
+
+`SlideMenuButton` reads `\.slideMenuToggle` from the environment and calls it when the user taps the button. `SlideMenu` injects this value into both its `main` and `menu` content trees, so the button works in either location without any extra wiring.
+
+<Note>
+  If you place a `SlideMenuButton` outside a `SlideMenu` hierarchy, `\.slideMenuToggle` resolves to a no-op closure and the button has no effect. No crash occurs.
+</Note>
+
+## Examples
+
+### System image variant
+
+The SF Symbol convenience initializer is the most concise way to add a toggle button.
+
+```swift
+SlideMenuButton(systemImage: "sidebar.leading")
+```
+
+### Custom label variant
+
+Pass any view as the label when you need text, a tinted icon, or a composed layout.
+
+```swift
+SlideMenuButton {
+    Label("Open menu", systemImage: "line.3.horizontal")
+}
+```
+
+### Placement in a toolbar
+
+The most common placement is a `ToolbarItem` in the leading position of a `NavigationStack` inside the `main` closure.
+
+```swift
+SlideMenu(direction: .left) {
+    NavigationStack {
+        ContentView()
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SlideMenuButton(systemImage: "sidebar.leading")
+                }
+            }
+    }
+} menu: {
+    SidebarMenuView()
+}
+```
+
+### As a close button inside the menu
+
+Because `SlideMenu` injects `\.slideMenuToggle` into the `menu` content tree as well, you can place a `SlideMenuButton` inside the menu panel to let the user close it from within.
+
+```swift
+SlideMenu(direction: .left) {
+    MainContentView()
+} menu: {
+    VStack(alignment: .leading, spacing: 20) {
+        HStack {
+            Text("Menu")
+                .font(.title2.bold())
+            Spacer()
+            SlideMenuButton {
+                Image(systemName: "xmark")
+                    .foregroundStyle(.secondary)
+            }
+        }
+
+        Button("Home") { /* update selection state */ }
+        Button("Settings") { /* update selection state */ }
+    }
+    .padding()
+}
+```
+
+<Warning>
+  Do not put `NavigationLink` inside the `menu` closure. Without a `NavigationStack` ancestor in the menu content tree, pushes will fail silently. Use `Button` with a `@State` selection variable instead — see the [menu-driven navigation guide](/guides/navigation).
+</Warning>
+
+<Tip>
+  You can style `SlideMenuButton` with any standard SwiftUI button modifiers — `buttonStyle`, `tint`, `font`, and so on — since it wraps a plain `Button` internally.
+</Tip>

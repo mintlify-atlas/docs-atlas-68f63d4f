@@ -1,0 +1,123 @@
+---
+title: "SlideMenu — SwiftUI container view API reference"
+description: "Full API reference for SlideMenu. Covers the initializer parameters, the seven environment values it reads for appearance, and the slideMenuToggle it injects."
+---
+
+`SlideMenu` is a generic SwiftUI container that slides your main content aside to reveal a menu panel. It supports drag-to-open gestures, tap-to-dismiss, left and right directions, and a full set of appearance modifiers applied through the environment.
+
+## Type declaration
+
+```swift
+public struct SlideMenu<Main: View, Menu: View>: View
+```
+
+`SlideMenu` is generic over two `View` types: `Main` for the primary content and `Menu` for the panel revealed behind it.
+
+## Initializer
+
+```swift
+public init(
+    direction: SlideMenuDirection = .left,
+    edgeZoneWidth: CGFloat = 30,
+    @ViewBuilder main: () -> Main,
+    @ViewBuilder menu: () -> Menu
+)
+```
+
+<ParamField path="direction" type="SlideMenuDirection" default=".left">
+  The edge the menu slides from. Pass `.left` to reveal the menu from the leading edge or `.right` to reveal it from the trailing edge. See [SlideMenuDirection](/api/slide-menu-direction).
+</ParamField>
+
+<ParamField path="edgeZoneWidth" type="CGFloat" default="30">
+  The width in points of the invisible touch zone along the screen edge that recognizes a swipe-to-open gesture. Increase this value if you find the gesture hard to trigger; decrease it if it conflicts with your content's own horizontal swipes.
+</ParamField>
+
+<ParamField path="main" type="() -> Main" required>
+  A `@ViewBuilder` closure that produces the primary content view. `SlideMenu` injects `\.slideMenuToggle` into this content's environment so that any `SlideMenuButton` nested here toggles the menu automatically — no bindings required.
+</ParamField>
+
+<ParamField path="menu" type="() -> Menu" required>
+  A `@ViewBuilder` closure that produces the menu content revealed behind the main surface. `SlideMenu` also injects `\.slideMenuToggle` here, so you can place a `SlideMenuButton` inside the menu panel as a close button.
+</ParamField>
+
+## Environment values read
+
+`SlideMenu` reads the following environment values to control its appearance and behavior. Set them with the corresponding view modifiers on the `SlideMenu` instance or any ancestor view.
+
+| Key | Type | Default | Purpose |
+|---|---|---|---|
+| `slideMenuWidth` | `CGFloat` | `290` | Width of the menu panel in points |
+| `slideMenuBackground` | `AnyShapeStyle` | `.background` | Background style for both panels |
+| `slideMenuOverlayColor` | `Color?` | `nil` (adaptive) | Dimming overlay color over main content |
+| `slideMenuOverlayOpacity` | `CGFloat` | `0.6` | Maximum opacity of the dimming overlay |
+| `slideMenuBorderColor` | `Color` | `.primary` | Border stroke color around main content |
+| `slideMenuBorderWidth` | `CGFloat` | `1` | Border stroke line width |
+| `slideMenuAnimation` | `Animation` | `.spring(response: 0.35, dampingFraction: 0.85)` | Open/close animation |
+
+<Note>
+  When `slideMenuOverlayColor` is `nil`, the overlay color adapts automatically: black in dark mode and white in light mode.
+</Note>
+
+## Environment values injected
+
+`SlideMenu` writes `\.slideMenuToggle` — a `@MainActor @Sendable () -> Void` closure — into the environment of **both** the `main` and `menu` content trees. Any `SlideMenuButton` (or custom view that reads `\.slideMenuToggle`) nested inside either tree can call this closure to toggle the menu without needing a direct reference to the `SlideMenu` state.
+
+## Examples
+
+### Minimal usage
+
+The simplest possible `SlideMenu` uses the default `.left` direction and wraps your content in two trailing closures.
+
+```swift
+SlideMenu {
+    Text("Main content")
+} menu: {
+    Text("Menu content")
+}
+```
+
+### With direction and edgeZoneWidth
+
+Use `direction: .right` and a wider `edgeZoneWidth` to open a trailing menu with a larger swipe target.
+
+```swift
+SlideMenu(direction: .right, edgeZoneWidth: 50) {
+    NavigationStack {
+        ContentView()
+    }
+} menu: {
+    SettingsMenuView()
+}
+```
+
+### With modifiers
+
+Chain view modifiers on the `SlideMenu` instance to customize its appearance. All modifiers write into the environment so they propagate to both panels.
+
+```swift
+SlideMenu(direction: .left) {
+    NavigationStack {
+        Text("Main Content")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SlideMenuButton(systemImage: "sidebar.leading")
+                }
+            }
+    }
+} menu: {
+    VStack(alignment: .leading, spacing: 16) {
+        Text("Menu Item 1")
+        Text("Menu Item 2")
+        SlideMenuButton { Label("Close", systemImage: "xmark") }
+    }
+    .padding()
+}
+.slideMenuWidth(300)
+.slideMenuBackground(.ultraThinMaterial)
+.slideMenuAnimation(.bouncy)
+.slideMenuOverlayOpacity(0.4)
+```
+
+<Tip>
+  You can apply `slideMenuWidth`, `slideMenuBackground`, and the other modifiers to any ancestor of `SlideMenu` — for example, at the root of your `WindowGroup` — to set defaults for your whole app.
+</Tip>

@@ -1,0 +1,98 @@
+---
+title: "Add a SlideMenuButton toggle to your SwiftUI app"
+description: "Add a menu toggle with SlideMenuButton — it reads the toggle action from the environment automatically. Place it in a toolbar or inside the menu panel itself."
+---
+
+`SlideMenuButton` is a purpose-built button that opens and closes the enclosing `SlideMenu`. It reads the toggle action from the SwiftUI environment, so you never have to pass a binding or callback — just drop it anywhere inside your `main` or `menu` content and it works.
+
+## Two initializer variants
+
+`SlideMenuButton` comes in two flavors depending on how much control you need over the button's appearance.
+
+### System image variant
+
+Pass an SF Symbol name and `SlideMenuButton` renders it as a tappable `Image`.
+
+```swift
+SlideMenuButton(systemImage: "sidebar.leading")
+```
+
+This is the most concise option and fits naturally in toolbars where you want a standard icon without extra styling.
+
+### Custom label variant
+
+Use the trailing closure initializer to supply any view as the button label.
+
+```swift
+SlideMenuButton {
+    Label("Menu", systemImage: "line.3.horizontal")
+}
+```
+
+You can pass any `View` here — a `Text`, an `HStack`, a custom drawn shape, or a `Label` as shown above.
+
+## Placing it in a NavigationStack toolbar
+
+The most common placement is the leading toolbar item of a `NavigationStack` inside the `main` content closure.
+
+```swift
+SlideMenu {
+    NavigationStack {
+        Text("Hello")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SlideMenuButton(systemImage: "sidebar.leading")
+                }
+            }
+    }
+} menu: {
+    Text("Menu")
+}
+```
+
+<Tip>
+  Use `placement: .topBarLeading` for a left-sliding menu and `placement: .topBarTrailing` for a right-sliding menu so the button sits next to the edge the menu appears from.
+</Tip>
+
+## Availability in both closures
+
+`SlideMenu` injects the toggle action into the environment of **both** the `main` and `menu` closures. You can place a `SlideMenuButton` inside the menu panel itself — useful for a close button at the top of the menu.
+
+```swift
+SlideMenu {
+    NavigationStack {
+        ContentView()
+    }
+} menu: {
+    VStack(alignment: .leading) {
+        HStack {
+            Spacer()
+            SlideMenuButton(systemImage: "xmark")
+                .padding()
+        }
+        // rest of menu content
+    }
+}
+```
+
+## Using the toggle action directly
+
+When you need a button that isn't `SlideMenuButton` — for example, a list row that also navigates — you can read `slideMenuToggle` from the environment yourself.
+
+```swift
+@Environment(\.slideMenuToggle) private var toggle
+```
+
+Then call `toggle()` inside any button action:
+
+```swift
+Button("Close menu") {
+    toggle()
+}
+```
+
+<Note>
+  `slideMenuToggle` is a `@MainActor @Sendable () -> Void` closure. Call it from the main actor only — inside a `Button` action or a `Task { @MainActor in ... }` block.
+</Note>
+
+This is the same mechanism `SlideMenuButton` uses internally, so there is no behavioral difference between the two approaches.
